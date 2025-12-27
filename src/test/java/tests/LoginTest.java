@@ -1,17 +1,33 @@
 package tests;
 
 import io.qameta.allure.junit4.DisplayName;
+import model.User;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import utils.ApiUtils;
 import driver.Configuration;
-import pages.*;
-
-import java.time.Duration;
+import pages.LoginPage;
+import pages.MainPage;
+import pages.RecoveryPage;
+import pages.RegistrationPage;
 
 public class LoginTest extends Configuration {
-    private final String TEST_EMAIL = "test-Barkhatov25@email.com";
-    private final String TEST_PASSWORD = "password123";
+    private User testUser;
+
+    @Before
+    public void setUp() {
+        // Создаем рандомного пользователя через API перед каждым тестом
+        testUser = ApiUtils.createRandomUser();
+    }
+
+    @After
+    public void deleteDown() {
+        // Удаляем пользователя после каждого теста
+        if (testUser != null && testUser.getAccessToken() != null) {
+            ApiUtils.deleteUser(testUser.getAccessToken());
+        }
+    }
 
     @Test
     @DisplayName("Вход через кнопку Войти в аккаунт")
@@ -20,10 +36,9 @@ public class LoginTest extends Configuration {
         mainPage.clickLoginButton();
 
         LoginPage loginPage = new LoginPage(driver);
-        loginPage.login(TEST_EMAIL, TEST_PASSWORD);
+        loginPage.login(testUser.getEmail(), testUser.getPassword());
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("stellarburgers.education-services.ru"));
+        mainPage.waitForMainPage();
 
         assert mainPage.isMainPageLoaded() : "Не удалось войти через главную кнопку";
     }
@@ -35,10 +50,9 @@ public class LoginTest extends Configuration {
         mainPage.clickPersonalAccountButton();
 
         LoginPage loginPage = new LoginPage(driver);
-        loginPage.login(TEST_EMAIL, TEST_PASSWORD);
+        loginPage.login(testUser.getEmail(), testUser.getPassword());
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("stellarburgers.education-services.ru"));
+        mainPage.waitForMainPage();
 
         assert mainPage.isMainPageLoaded() : "Не удалось войти через личный кабинет";
     }
@@ -55,10 +69,9 @@ public class LoginTest extends Configuration {
         RegistrationPage registrationPage = new RegistrationPage(driver);
         registrationPage.clickLoginLink();
 
-        loginPage.login(TEST_EMAIL, TEST_PASSWORD);
+        loginPage.login(testUser.getEmail(), testUser.getPassword());
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("stellarburgers.education-services.ru"));
+        mainPage.waitForMainPage();
 
         assert mainPage.isMainPageLoaded() : "Не удалось войти через форму регистрации";
     }
@@ -75,10 +88,9 @@ public class LoginTest extends Configuration {
         RecoveryPage recoveryPage = new RecoveryPage(driver);
         recoveryPage.clickLoginLink();
 
-        loginPage.login(TEST_EMAIL, TEST_PASSWORD);
+        loginPage.login(testUser.getEmail(), testUser.getPassword());
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("stellarburgers.education-services.ru"));
+        mainPage.waitForMainPage();
 
         assert mainPage.isMainPageLoaded() : "Не удалось войти через восстановление пароля";
     }

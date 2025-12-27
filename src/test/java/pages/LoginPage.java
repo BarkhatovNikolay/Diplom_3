@@ -1,5 +1,7 @@
 package pages;
 
+
+import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -31,33 +33,31 @@ public class LoginPage {
     @FindBy(xpath = "//h2[text()='Вход']")
     private WebElement loginHeader;
 
+    @Step("Ввод email")
     public void enterEmail(String email) {
         emailField.sendKeys(email);
     }
-
+    @Step("Ввод пароля")
     public void enterPassword(String password) {
         passwordField.sendKeys(password);
     }
-
+    @Step("Нажатие кнопки логин")
     public void clickLoginButton() {
         loginButton.click();
     }
-
+    @Step("Нажатие на ссылку Зарегистрироваться")
     public void clickRegisterLink() {
         registerLink.click();
     }
-
+    @Step("Нажатие на Восстановить пароль")
     public void clickRecoverPasswordLink() {
         recoverPasswordLink.click();
     }
-
+    @Step("Выполнить вход")
     public void login(String email, String password) {
         enterEmail(email);
         enterPassword(password);
         clickLoginButton();
     }
 
-    public boolean isLoginPageLoaded() {
-        return loginHeader.isDisplayed();
-    }
 }

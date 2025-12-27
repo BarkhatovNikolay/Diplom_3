@@ -1,15 +1,26 @@
 package tests;
 
 import io.qameta.allure.junit4.DisplayName;
+import model.User;
+import org.junit.After;
 import org.junit.Test;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import driver.Configuration;
-import pages.*;
+import pages.LoginPage;
+import pages.MainPage;
+import pages.RegistrationPage;
+import utils.ApiUtils;
 
-import java.time.Duration;
 
 public class RegistrationTest extends Configuration {
+    private User testUser;
+    private String userEmail;
+
+    @After
+    public void deleteDown() {
+        if (testUser != null && testUser.getAccessToken() != null) {
+            ApiUtils.deleteUser(testUser.getAccessToken());
+        }
+    }
 
     @Test
     @DisplayName("Успешная регистрация")
@@ -22,19 +33,22 @@ public class RegistrationTest extends Configuration {
 
         RegistrationPage registrationPage = new RegistrationPage(driver);
 
-        String generator = String.valueOf(System.currentTimeMillis());
-        String name = "User_" + generator.substring(8);
-        String email = "test_" + generator + "@email.com";
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String name = "User_" + timestamp.substring(timestamp.length() - 6);
+        userEmail = "test_" + timestamp + "@email.com";
         String password = "password123";
 
-        registrationPage.register(name, email, password);
+        registrationPage.register(name, userEmail, password);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.urlContains("login"));
+        mainPage.waitLoginInput();
 
-        loginPage.login(email, password);
+        loginPage.login(userEmail, password);
 
-        wait.until(ExpectedConditions.urlContains("stellarburgers.education-services.ru"));
+        mainPage.waitForMainPage();
+
+        testUser = new User(userEmail, password, name, null);
+
+        testUser = ApiUtils.createRandomUser();
 
         assert mainPage.isMainPageLoaded() : "Не удалось зарегистрироваться и войти";
     }
@@ -51,17 +65,14 @@ public class RegistrationTest extends Configuration {
         RegistrationPage registrationPage = new RegistrationPage(driver);
 
         String name = "Test User";
-        String email = "test_123@email.com";
+        String email = "test_" + System.currentTimeMillis() + "@email.com";
         String shortPassword = "12345";
 
         registrationPage.register(name, email, shortPassword);
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
-        wait.until(driver -> registrationPage.getErrorMessage() != null &&
-                !registrationPage.getErrorMessage().isEmpty());
 
         String error = registrationPage.getErrorMessage();
         assert error.contains("Некорректный пароль") :
-                "Ожидалось'Некорректный пароль', но получено: " + error;
+                "Ожидалось 'Некорректный пароль', но получено: " + error;
     }
 }

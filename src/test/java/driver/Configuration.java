@@ -15,7 +15,7 @@ public class Configuration {
     protected static final String BASE_URL = "https://stellarburgers.education-services.ru";
     @Before
     public void installDriver() {
-        String browser = System.getProperty("browser", "yandex");
+        String browser = System.getProperty("browser", "chrome");
 
         if ("yandex".equals(browser)) {
             setupYandexBrowser();
@@ -31,7 +31,7 @@ public class Configuration {
 
     private void setupYandexBrowser() {
 
-        String yandexDriverPath = Paths.get("src/main/resources/drivers/yandexdriver.exe")
+        String yandexDriverPath = Paths.get("src/test/java/drivers/yandexdriver.exe")
                 .toAbsolutePath().toString();
         System.setProperty("webdriver.chrome.driver", yandexDriverPath);
 
